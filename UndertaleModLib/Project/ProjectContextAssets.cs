@@ -79,7 +79,11 @@ partial class ProjectContext
                 }
                 catch (Exception e)
                 {
-                    throw new ProjectException($"Failed to load asset file \"{Path.GetFileName(assetPath)}\": {e.Message}", e);
+                    // Prevent project from loading if it fails to load the lang json
+                    Console.Error.WriteLine($"Failed to load asset file \"{Path.GetFileName(assetPath)}\": {e.Message}", e);
+                    continue;
+
+                    // throw new ProjectException($"Failed to load asset file \"{Path.GetFileName(assetPath)}\": {e.Message}", e);
                 }
 
                 // Add to list for later processing
