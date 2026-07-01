@@ -793,7 +793,7 @@ public partial class Program : IScriptInterface
                 // FileName = "C:/Program Files/Git/usr/bin/bash.exe",
                 // Arguments = $"-c \"{gameExePath} --game {options.Destination.FullName}\" ; exec bash",
                 FileName = "cmd",
-                Arguments = $"/k {gameExePath} -game \"{options.Destination.FullName}\" -debugoutput debugoutput.tmp | tee",
+                Arguments = $"/k {gameExePath} -game \"{options.Destination.FullName}\" -debugoutput debugoutput.tmp | tee && exit",
                 CreateNoWindow = false,
                 UseShellExecute = true,
                 WindowStyle = ProcessWindowStyle.Normal,
