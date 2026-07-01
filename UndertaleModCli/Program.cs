@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -288,9 +289,29 @@ public partial class Program : IScriptInterface
             });
         });
 
+        Command projectWatchCommand = new("watch", "Load a project, reload external files and build on 'enter' press.")
+        {
+            projectBuildFileArgument,
+            verboseOption,
+            projectBuildSourceOption,
+            projectBuildDestinationOption
+        };
+
+        projectWatchCommand.SetAction(parseResult =>
+        {
+            return WatchProject(new ProjectBuildOptions()
+            {
+                ProjectFile = parseResult.GetValue(projectBuildFileArgument),
+                Verbose = parseResult.GetValue(verboseOption),
+                Source = parseResult.GetValue(projectBuildSourceOption),
+                Destination = parseResult.GetValue(projectBuildDestinationOption)
+            });
+        });
+
         Command projectCommand = new("project", "Subcommands that deal with projects")
         {
-            projectBuildCommand
+            projectBuildCommand,
+            projectWatchCommand
         };
 
         // Merge everything together
@@ -633,8 +654,17 @@ public partial class Program : IScriptInterface
         return EXIT_SUCCESS;
     }
 
-    private static int BuildProject(ProjectBuildOptions options)
+    private static void printPerf(System.Diagnostics.Stopwatch sw, string msg)
     {
+        sw.Stop();
+        Console.WriteLine("PERF - " + msg + " - Elapsed {0}", sw.Elapsed);
+    }
+
+    private static int WatchProject(ProjectBuildOptions options)
+    {
+        System.Diagnostics.Stopwatch swTotal = new System.Diagnostics.Stopwatch();
+        System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+
         try
         {
             ArgumentNullException.ThrowIfNull(options.ProjectFile);
@@ -658,7 +688,7 @@ public partial class Program : IScriptInterface
             Console.Error.WriteLine(e.Message);
             return EXIT_FAILURE;
         }
-
+        
         program.FilePath = options.Destination.FullName;
 
         // Load project
@@ -688,11 +718,165 @@ public partial class Program : IScriptInterface
 
         program.Project = newProjectContext;
 
+        // Get Game exe path
+        string gameExePath = Paths.TryJoinVerifyWithinDirectory(Path.GetDirectoryName(options.Destination.FullName), "DELTARUNE.exe");
+        if (gameExePath is null)
+        {
+            Console.Error.WriteLine("Error: Game executable not found.");
+        }
+
+        Console.WriteLine("\n\n-- Project loaded --");
+
+        while (true)
+        {
+            Console.WriteLine("\n\n-- Press Enter to recompile --\n");
+            var key = Console.ReadKey(true);
+
+            if (key.KeyChar == 'x')
+            {
+                break;
+            }
+
+            if (key.Key != ConsoleKey.Enter)
+            {
+                continue;
+            }
+
+            swTotal.Restart();
+            
+            // Reload everything
+            sw.Restart();
+            try
+            {
+                if (program.Verbose)
+                    Console.WriteLine($"Loading project file '{options.ProjectFile.FullName}'");
+
+                newProjectContext = ProjectContext.CreateWithDataFilePaths(options.Source.FullName, options.Destination.FullName, options.ProjectFile.FullName);
+
+                if (program.Verbose)
+                    Console.WriteLine($"Importing project into source data file");
+
+                newProjectContext.Import(program.Data);
+            }
+            catch (ProjectException e)
+            {
+                Console.Error.WriteLine($"Failed to load project: {e.Message}");
+                // return EXIT_FAILURE;
+                continue;
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine($"Error occurred when loading project:\n{e}");
+                // return EXIT_FAILURE;
+                continue;
+            }
+
+            program.Project = newProjectContext;
+            printPerf(sw, "Reloaded project files");
+
+            // Save destination data file
+            if (program.Verbose)
+            {
+                Console.WriteLine($"Saving to destination data file");
+            }
+            program.SaveDataFile(options.Destination.FullName);
+
+            printPerf(swTotal, "Time elapsed");
+
+            // Run the game
+            // Process.Start(new ProcessStartInfo(gameExePath, ["-game", options.Destination.FullName]));
+            Process.Start(new ProcessStartInfo
+            {
+                // FileName = gameExePath,
+                // ArgumentList = ["-game", options.Destination.FullName],
+
+                // FileName = "C:/Program Files/Git/usr/bin/bash.exe",
+                // Arguments = $"-c \"{gameExePath} --game {options.Destination.FullName}\" ; exec bash",
+                FileName = "cmd",
+                Arguments = $"/k {gameExePath} -game \"{options.Destination.FullName}\" -debugoutput debugoutput.tmp | tee",
+                CreateNoWindow = false,
+                UseShellExecute = true,
+                WindowStyle = ProcessWindowStyle.Normal,
+            });
+        }
+
+        return EXIT_SUCCESS;
+    }
+
+    private static int BuildProject(ProjectBuildOptions options)
+    {
+        System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+        System.Diagnostics.Stopwatch swTotal = new System.Diagnostics.Stopwatch();
+        swTotal.Start();
+
+        try
+        {
+            ArgumentNullException.ThrowIfNull(options.ProjectFile);
+            ArgumentNullException.ThrowIfNull(options.Source);
+            ArgumentNullException.ThrowIfNull(options.Destination);
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine(e.Message);
+            return EXIT_FAILURE;
+        }
+
+        // Load source
+        sw.Start();
+        Program program;
+        try
+        {
+            program = new Program(options.Source, options.Verbose);
+        }
+        catch (FileNotFoundException e)
+        {
+            Console.Error.WriteLine(e.Message);
+            return EXIT_FAILURE;
+        }
+        printPerf(sw, "Loaded source");
+        
+        program.FilePath = options.Destination.FullName;
+
+        // Load project
+        ProjectContext newProjectContext;
+        try
+        {
+            if (program.Verbose)
+                Console.WriteLine($"Loading project file '{options.ProjectFile.FullName}'");
+
+            sw.Restart();
+            newProjectContext = ProjectContext.CreateWithDataFilePaths(options.Source.FullName, options.Destination.FullName, options.ProjectFile.FullName);
+            printPerf(sw, "Loaded project file");
+
+            if (program.Verbose)
+                Console.WriteLine($"Importing project into source data file");
+
+            sw.Restart();
+            newProjectContext.Import(program.Data);
+            printPerf(sw, "Import project data into source data file");
+        }
+        catch (ProjectException e)
+        {
+            Console.Error.WriteLine($"Failed to load project: {e.Message}");
+            return EXIT_FAILURE;
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine($"Error occurred when loading project:\n{e}");
+            return EXIT_FAILURE;
+        }
+
+        program.Project = newProjectContext;
+
         // Save destination data file
         if (program.Verbose)
             Console.WriteLine($"Saving to destination data file");
 
+        sw.Restart();
         program.SaveDataFile(options.Destination.FullName);
+        printPerf(sw, "Saved to destination file");
+
+        printPerf(swTotal, "Total time elapsed");
 
         return EXIT_SUCCESS;
     }

@@ -239,6 +239,13 @@ public sealed partial class ProjectContext
         JsonSerializer.Serialize(fs, _mainOptions, JsonOptions);
     }
 
+    private static void printPerf(System.Diagnostics.Stopwatch sw, string msg)
+    {
+        sw.Stop();
+        Console.WriteLine("PERF - " + msg + " - Elapsed {0}", sw.Elapsed);
+    }
+
+
     /// <summary>
     /// Imports all of the data of the project.
     /// </summary>
@@ -256,6 +263,8 @@ public sealed partial class ProjectContext
     /// <exception cref="ProjectException">When a project-specific exception occurs</exception>
     public void Import(UndertaleData currentData = null, IGameFileBackup existingFileBackup = null, Action<Action> mainThreadAction = null)
     {
+        System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+
         // Ensure project is imported
         if (_mainOptions is not null)
         {
@@ -305,17 +314,24 @@ public sealed partial class ProjectContext
             }
             else
             {
+                sw.Restart();
                 CreateNewBackup();
+                printPerf(sw, "Created backup");
             }
 
             // Perform import
+            sw.Restart();
             RunPreImportScripts();
             ImportSubProjects();
             ImportExternalFiles();
             ApplyFileOperations();
             ApplyFilePatches();
+            printPerf(sw, "Perform import");
+
+            sw.Restart();
             if (LoadDataPath is not null)
             {
+                
                 if (Data is null)
                 {
                     // Data should be ready for loading now
@@ -324,9 +340,13 @@ public sealed partial class ProjectContext
                 }
                 RunPreAssetImportScripts();
                 LoadProjectAssets();
+                
             }
             RunPostImportScripts();
             DeinitializeScripting();
+            printPerf(sw, "Loading data...?");
+
+            sw.Restart();
             if (SaveDataPath is not null)
             {
                 FileBackup.BackupFile(SaveDataPath);
@@ -338,14 +358,17 @@ public sealed partial class ProjectContext
                     Data = null;
                 }
             }
+            printPerf(sw, "FileBackup.BackupFile");
         }
         finally
         {
+            sw.Restart();
             // If not using an existing file backup instance, finish the backup process
             if (existingFileBackup is null)
             {
                 FinishNewBackup();
             }
+            printPerf(sw, "Finished backup");
         }
     }
 
