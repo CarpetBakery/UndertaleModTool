@@ -727,6 +727,15 @@ public partial class Program : IScriptInterface
 
         Console.WriteLine("\n\n-- Project loaded --");
 
+        var procInfo = new ProcessStartInfo
+        {
+            FileName = "cmd",
+            Arguments = $"/k {gameExePath} -game \"{options.Destination.FullName}\" -debugoutput debugoutput.tmp | tee && exit",
+            CreateNoWindow = false,
+            UseShellExecute = true,
+            WindowStyle = ProcessWindowStyle.Normal,
+        };
+
         while (true)
         {
             Console.WriteLine("\n\n-- Press Enter to recompile --\n");
@@ -735,6 +744,13 @@ public partial class Program : IScriptInterface
             if (key.KeyChar == 'x')
             {
                 break;
+            }
+
+            if (key.KeyChar == 'r')
+            {
+                // Just run the game
+                Process.Start(procInfo);
+                continue;
             }
 
             if (key.Key != ConsoleKey.Enter)
@@ -785,19 +801,7 @@ public partial class Program : IScriptInterface
 
             // Run the game
             // Process.Start(new ProcessStartInfo(gameExePath, ["-game", options.Destination.FullName]));
-            Process.Start(new ProcessStartInfo
-            {
-                // FileName = gameExePath,
-                // ArgumentList = ["-game", options.Destination.FullName],
-
-                // FileName = "C:/Program Files/Git/usr/bin/bash.exe",
-                // Arguments = $"-c \"{gameExePath} --game {options.Destination.FullName}\" ; exec bash",
-                FileName = "cmd",
-                Arguments = $"/k {gameExePath} -game \"{options.Destination.FullName}\" -debugoutput debugoutput.tmp | tee && exit",
-                CreateNoWindow = false,
-                UseShellExecute = true,
-                WindowStyle = ProcessWindowStyle.Normal,
-            });
+            Process.Start(procInfo);
         }
 
         return EXIT_SUCCESS;
