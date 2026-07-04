@@ -654,7 +654,7 @@ public partial class Program : IScriptInterface
         return EXIT_SUCCESS;
     }
 
-    private static void printPerf(System.Diagnostics.Stopwatch sw, string msg)
+    private static void PrintPerf(System.Diagnostics.Stopwatch sw, string msg)
     {
         sw.Stop();
         Console.WriteLine("PERF - " + msg + " - Elapsed {0}", sw.Elapsed);
@@ -719,10 +719,16 @@ public partial class Program : IScriptInterface
         program.Project = newProjectContext;
 
         // Get Game exe path
-        string gameExePath = Paths.TryJoinVerifyWithinDirectory(Path.GetDirectoryName(options.Destination.FullName), "DELTARUNE.exe");
+        string gameExePath = null;
+        {
+            string directoryPath = Path.GetDirectoryName(options.Destination.FullName);
+            gameExePath = Directory.EnumerateFiles(directoryPath, "*.exe").FirstOrDefault();
+        }
+
         if (gameExePath is null)
         {
             Console.Error.WriteLine("Error: Game executable not found.");
+            return EXIT_FAILURE;
         }
 
         Console.WriteLine("\n\n-- Project loaded --");
@@ -788,7 +794,7 @@ public partial class Program : IScriptInterface
             }
 
             program.Project = newProjectContext;
-            printPerf(sw, "Reloaded project files");
+            PrintPerf(sw, "Reloaded project files");
 
             // Save destination data file
             if (program.Verbose)
@@ -797,10 +803,9 @@ public partial class Program : IScriptInterface
             }
             program.SaveDataFile(options.Destination.FullName);
 
-            printPerf(swTotal, "Time elapsed");
+            PrintPerf(swTotal, "Time elapsed");
 
             // Run the game
-            // Process.Start(new ProcessStartInfo(gameExePath, ["-game", options.Destination.FullName]));
             Process.Start(procInfo);
         }
 
@@ -837,7 +842,7 @@ public partial class Program : IScriptInterface
             Console.Error.WriteLine(e.Message);
             return EXIT_FAILURE;
         }
-        printPerf(sw, "Loaded source");
+        PrintPerf(sw, "Loaded source");
         
         program.FilePath = options.Destination.FullName;
 
@@ -850,14 +855,14 @@ public partial class Program : IScriptInterface
 
             sw.Restart();
             newProjectContext = ProjectContext.CreateWithDataFilePaths(options.Source.FullName, options.Destination.FullName, options.ProjectFile.FullName);
-            printPerf(sw, "Loaded project file");
+            PrintPerf(sw, "Loaded project file");
 
             if (program.Verbose)
                 Console.WriteLine($"Importing project into source data file");
 
             sw.Restart();
             newProjectContext.Import(program.Data);
-            printPerf(sw, "Import project data into source data file");
+            PrintPerf(sw, "Import project data into source data file");
         }
         catch (ProjectException e)
         {
@@ -878,9 +883,9 @@ public partial class Program : IScriptInterface
 
         sw.Restart();
         program.SaveDataFile(options.Destination.FullName);
-        printPerf(sw, "Saved to destination file");
+        PrintPerf(sw, "Saved to destination file");
 
-        printPerf(swTotal, "Total time elapsed");
+        PrintPerf(swTotal, "Total time elapsed");
 
         return EXIT_SUCCESS;
     }

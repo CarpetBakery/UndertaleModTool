@@ -239,7 +239,7 @@ public sealed partial class ProjectContext
         JsonSerializer.Serialize(fs, _mainOptions, JsonOptions);
     }
 
-    private static void printPerf(System.Diagnostics.Stopwatch sw, string msg)
+    private static void PrintPerf(System.Diagnostics.Stopwatch sw, string msg)
     {
         sw.Stop();
         Console.WriteLine("PERF - " + msg + " - Elapsed {0}", sw.Elapsed);
@@ -316,7 +316,7 @@ public sealed partial class ProjectContext
             {
                 sw.Restart();
                 CreateNewBackup();
-                printPerf(sw, "Created backup");
+                PrintPerf(sw, "Created backup");
             }
 
             // Perform import
@@ -326,7 +326,7 @@ public sealed partial class ProjectContext
             ImportExternalFiles();
             ApplyFileOperations();
             ApplyFilePatches();
-            printPerf(sw, "Perform import");
+            PrintPerf(sw, "Perform import");
 
             sw.Restart();
             if (LoadDataPath is not null)
@@ -344,7 +344,7 @@ public sealed partial class ProjectContext
             }
             RunPostImportScripts();
             DeinitializeScripting();
-            printPerf(sw, "Loading data...?");
+            PrintPerf(sw, "Loading data...?");
 
             sw.Restart();
             if (SaveDataPath is not null)
@@ -358,7 +358,7 @@ public sealed partial class ProjectContext
                     Data = null;
                 }
             }
-            printPerf(sw, "FileBackup.BackupFile");
+            PrintPerf(sw, "FileBackup.BackupFile");
         }
         finally
         {
@@ -368,7 +368,7 @@ public sealed partial class ProjectContext
             {
                 FinishNewBackup();
             }
-            printPerf(sw, "Finished backup");
+            PrintPerf(sw, "Finished backup");
         }
     }
 
