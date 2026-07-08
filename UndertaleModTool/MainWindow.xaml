@@ -137,7 +137,7 @@
                 </local:MenuItemDark>
                 <local:MenuItemDark Header="_Project">
                     <MenuItem Header="_New project" Command="{x:Static local:MainWindow.NewProjectCommand}"></MenuItem>
-                    <MenuItem Header="_Open project" Command="{x:Static local:MainWindow.OpenProjectCommand}"></MenuItem>
+                    <MenuItem Header="_Open project" Command="{x:Static local:MainWindow.OpenProjectCommand}" InputGestureText="Ctrl+Shift+O"></MenuItem>
                     <MenuItem Header="_Save project" Command="{x:Static local:MainWindow.SaveProjectCommand}">
                         <MenuItem.Style>
                             <Style TargetType="{x:Type MenuItem}">
