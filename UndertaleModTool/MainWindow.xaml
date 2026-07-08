@@ -71,6 +71,9 @@
         <KeyBinding Gesture="Ctrl+Tab" Command="{x:Static local:MainWindow.SwitchToNextTabCommand}"/>
         <KeyBinding Gesture="Ctrl+Shift+Tab" Command="{x:Static local:MainWindow.SwitchToPrevTabCommand}"/>
         <KeyBinding Gesture="Ctrl+Shift+F" Command="{x:Static local:MainWindow.SearchInCodeCommand}" />
+        <KeyBinding Gesture="Ctrl+Shift+O" Command="{x:Static local:MainWindow.OpenProjectCommand}" />
+        <KeyBinding Gesture="Ctrl+Shift+S" Command="{x:Static local:MainWindow.SaveProjectCommand}" />
+        <KeyBinding Gesture="Ctrl+E" Command="{x:Static local:MainWindow.ViewProjectAssetsCommand}" />
     </Window.InputBindings>
     <Grid>
         <DockPanel>
@@ -152,7 +155,7 @@
                             </Style>
                         </MenuItem.Style>
                     </MenuItem>
-                    <MenuItem Header="_View unexported assets" Command="{x:Static local:MainWindow.ViewProjectAssetsCommand}">
+                    <MenuItem Header="_View unexported assets" Command="{x:Static local:MainWindow.ViewProjectAssetsCommand}" InputGestureText="Ctrl+E">
                         <MenuItem.Style>
                             <Style TargetType="{x:Type MenuItem}">
                                 <Style.Triggers>
