@@ -51,6 +51,7 @@
         <CommandBinding Command="{x:Static local:MainWindow.SearchInCodeCommand}" Executed="Command_SearchInCode"/>
         <CommandBinding Command="{x:Static local:MainWindow.NewProjectCommand}" Executed="Command_NewProject" />
         <CommandBinding Command="{x:Static local:MainWindow.OpenProjectCommand}" Executed="Command_OpenProject" />
+        <CommandBinding Command="{x:Static local:MainWindow.OpenLastProjectCommand}" Executed="Command_OpenLastProject" />
         <CommandBinding Command="{x:Static local:MainWindow.SaveProjectCommand}" Executed="Command_SaveProject" />
         <CommandBinding Command="{x:Static local:MainWindow.ViewProjectAssetsCommand}" Executed="Command_ViewProjectAssets" />
         <CommandBinding Command="{x:Static local:MainWindow.CloseProjectCommand}" Executed="Command_CloseProject" />
@@ -72,6 +73,7 @@
         <KeyBinding Gesture="Ctrl+Shift+Tab" Command="{x:Static local:MainWindow.SwitchToPrevTabCommand}"/>
         <KeyBinding Gesture="Ctrl+Shift+F" Command="{x:Static local:MainWindow.SearchInCodeCommand}" />
         <KeyBinding Gesture="Ctrl+Shift+O" Command="{x:Static local:MainWindow.OpenProjectCommand}" />
+        <KeyBinding Gesture="Ctrl+Shift+R" Command="{x:Static local:MainWindow.OpenLastProjectCommand}" />
         <KeyBinding Gesture="Ctrl+Shift+S" Command="{x:Static local:MainWindow.SaveProjectCommand}" />
         <KeyBinding Gesture="Ctrl+E" Command="{x:Static local:MainWindow.ViewProjectAssetsCommand}" />
     </Window.InputBindings>
@@ -138,6 +140,7 @@
                 <local:MenuItemDark Header="_Project">
                     <MenuItem Header="_New project" Command="{x:Static local:MainWindow.NewProjectCommand}"></MenuItem>
                     <MenuItem Header="_Open project" Command="{x:Static local:MainWindow.OpenProjectCommand}" InputGestureText="Ctrl+Shift+O"></MenuItem>
+                    <MenuItem Header="_Open last project" Command="{x:Static local:MainWindow.OpenLastProjectCommand}" InputGestureText="Ctrl+Shift+R"></MenuItem>
                     <MenuItem Header="_Save project" Command="{x:Static local:MainWindow.SaveProjectCommand}">
                         <MenuItem.Style>
                             <Style TargetType="{x:Type MenuItem}">

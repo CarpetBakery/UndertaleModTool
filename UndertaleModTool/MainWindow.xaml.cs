@@ -77,6 +77,7 @@ namespace UndertaleModTool
         public static readonly RoutedUICommand SearchInCodeCommand = new("Search in code", "SearchInCode", typeof(MainWindow));
         public static readonly RoutedUICommand NewProjectCommand = new("New project", "NewProject", typeof(MainWindow));
         public static readonly RoutedUICommand OpenProjectCommand = new("Open project", "OpenProject", typeof(MainWindow));
+        public static readonly RoutedUICommand OpenLastProjectCommand = new("Open last project", "OpenLastProject", typeof(MainWindow));
         public static readonly RoutedUICommand SaveProjectCommand = new("Save project", "SaveProject", typeof(MainWindow));
         public static readonly RoutedUICommand ViewProjectAssetsCommand = new("View project assets", "ViewProjectAssets", typeof(MainWindow));
         public static readonly RoutedUICommand CloseProjectCommand = new("Close project", "CloseProject", typeof(MainWindow));
@@ -4021,7 +4022,96 @@ result in loss of work.");
             // Start using new project context
             AssignNewProject(newProjectContext);
             SetUMTConsoleText($"Opened project \"{newProjectContext.Name}\".");
+
+            // Save paths to settings file for OpenLastProject
+            Settings.Instance.LastProjectPath = openProjectDialog.FileName;
+            Settings.Instance.LastProjectWinSource = loadFilePath;
+            Settings.Instance.LastProjectWinDest = saveFilePath;
+            Settings.Save();
         }
+
+        private async void Command_OpenLastProject(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (Project is not null && Project.HasUnexportedAssets)
+            {
+                if (this.ShowQuestionWithCancel("There are assets marked to be exported in the current project - open another new project and discard all unexported changes?", MessageBoxImage.Warning, "Project already open") != MessageBoxResult.Yes)
+                {
+                    // Abort opening project
+                    return;
+                }
+            }
+
+            string lastProjectPath = Settings.Instance.LastProjectPath;
+            string lastProjectSource = Settings.Instance.LastProjectWinSource;
+            string lastProjectDest = Settings.Instance.LastProjectWinDest;
+
+            // Get filepaths from some settings thing
+            if (!File.Exists(lastProjectPath))
+            {
+                this.ShowError($"Project file '{lastProjectPath}' doesn't exist.");
+                return;
+            }
+
+            if (!File.Exists(lastProjectSource))
+            {
+                this.ShowError($"Project .win source '{lastProjectSource}' doesn't exist.");
+                return;
+            }
+
+            if (!File.Exists(lastProjectDest))
+            {
+                this.ShowError($"Project .win destination '{lastProjectDest}' doesn't exist.");
+                return;
+            }
+
+            // Load data file if needed
+            if (Project == null || Project.LoadDataPath != lastProjectSource)
+            {
+                await LoadFile(lastProjectSource, true);
+            }
+
+            // Upon load failure, exit
+            if (Data is null || FilePath is null)
+            {
+                this.ShowError("Load failure.");
+                return;
+            }
+
+            // Attempt loading project from the specific JSON
+            ProjectContext newProjectContext = null;
+            IsEnabled = false;
+            await Task.Run(() =>
+            {
+                try
+                {
+                    newProjectContext = ProjectContext.CreateWithDataFilePaths(lastProjectSource, lastProjectDest, lastProjectPath);
+                    newProjectContext.Import(Data, null, (f) => Dispatcher.Invoke(f));
+                }
+                catch (ProjectException ex)
+                {
+                    newProjectContext = null;
+                    this.ShowError(ex.Message, "Failed to load project");
+                }
+                catch (Exception ex)
+                {
+                    newProjectContext = null;
+                    this.ShowError($"Error occurred when loading project:\n{ex}");
+                }
+            });
+            IsEnabled = true;
+
+            // Don't assign new project context if load failed
+            if (newProjectContext is null)
+            {
+                SetUMTConsoleText("Project failed to open.");
+                return;
+            }
+
+            // Start using new project context
+            AssignNewProject(newProjectContext);
+            SetUMTConsoleText($"Opened project \"{newProjectContext.Name}\".");
+        }
+
         private async void Command_SaveProject(object sender, ExecutedRoutedEventArgs e)
         {
             if (Data is null || FilePath is null)

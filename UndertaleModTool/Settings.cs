@@ -57,6 +57,10 @@ namespace UndertaleModTool
 
         public bool RecompileAllCodeSourcesOnProjectSave { get; set; } = false;
 
+        public string LastProjectPath { get; set; } = "";
+        public string LastProjectWinSource { get; set; } = "";
+        public string LastProjectWinDest { get; set; } = "";
+
         public static Settings Instance { get; private set; }
 
         public static JsonSerializerOptions JsonOptions = new()
