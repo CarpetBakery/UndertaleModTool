@@ -55,6 +55,7 @@
         <CommandBinding Command="{x:Static local:MainWindow.SaveProjectCommand}" Executed="Command_SaveProject" />
         <CommandBinding Command="{x:Static local:MainWindow.ViewProjectAssetsCommand}" Executed="Command_ViewProjectAssets" />
         <CommandBinding Command="{x:Static local:MainWindow.CloseProjectCommand}" Executed="Command_CloseProject" />
+        <CommandBinding Command="{x:Static local:MainWindow.FocusSearchCommand}" Executed="Command_FocusSearch" />
     </Window.CommandBindings>
     <Window.InputBindings>
         <KeyBinding Modifiers="Control" Key="N" Command="New"/>
@@ -76,6 +77,7 @@
         <KeyBinding Gesture="Ctrl+Shift+R" Command="{x:Static local:MainWindow.OpenLastProjectCommand}" />
         <KeyBinding Gesture="Ctrl+Shift+S" Command="{x:Static local:MainWindow.SaveProjectCommand}" />
         <KeyBinding Gesture="Ctrl+E" Command="{x:Static local:MainWindow.ViewProjectAssetsCommand}" />
+        <KeyBinding Gesture="Ctrl+P" Command="{x:Static local:MainWindow.FocusSearchCommand}" />
     </Window.InputBindings>
     <Grid>
         <DockPanel>

@@ -81,6 +81,7 @@ namespace UndertaleModTool
         public static readonly RoutedUICommand SaveProjectCommand = new("Save project", "SaveProject", typeof(MainWindow));
         public static readonly RoutedUICommand ViewProjectAssetsCommand = new("View project assets", "ViewProjectAssets", typeof(MainWindow));
         public static readonly RoutedUICommand CloseProjectCommand = new("Close project", "CloseProject", typeof(MainWindow));
+        public static readonly RoutedUICommand FocusSearchCommand = new("Focus search", "FocusSearch", typeof(MainWindow));
 
         public ObservableCollection<Tab> Tabs { get; set; } = new();
         public Tab CurrentTab
@@ -4207,6 +4208,12 @@ result in loss of work.");
             UnloadProject();
             UpdateObjectLabel(Selected);
             SetUMTConsoleText("Project closed.");
+        }
+
+        private void Command_FocusSearch(object sender, ExecutedRoutedEventArgs e)
+        {
+            SearchBox.Focus();
+            Keyboard.Focus(SearchBox);
         }
     }
 
