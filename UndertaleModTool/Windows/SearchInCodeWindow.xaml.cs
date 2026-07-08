@@ -466,6 +466,11 @@ namespace UndertaleModTool.Windows
                 MainWindow.SetDarkTitleBarForWindow(this, true, false);
         }
 
+        private void CommandBinding_Close(object sender, ExecutedRoutedEventArgs e)
+        {
+            Close();
+        }
+        
         private void Window_Closing(object sender, CancelEventArgs e)
         {
             e.Cancel = (loaderDialog is not null);

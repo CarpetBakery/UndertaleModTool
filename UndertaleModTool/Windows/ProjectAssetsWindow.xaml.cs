@@ -73,6 +73,11 @@ namespace UndertaleModTool
             AssetsListView.UpdateLayout();
         }
 
+        private void CommandBinding_Close(object sender, ExecutedRoutedEventArgs e)
+        {
+            Close();
+        }
+
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             if (mainWindow.Project is ProjectContext project)
