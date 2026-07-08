@@ -1432,8 +1432,10 @@ namespace UndertaleModTool
 
         private void MainTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            OpenInTab(Highlighted);
+            bool newTab = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
+            OpenInTab(Highlighted, newTab);
         }
+        
         private void MainTree_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ButtonState == MouseButtonState.Pressed && e.ChangedButton == System.Windows.Input.MouseButton.Middle)
@@ -1460,11 +1462,13 @@ namespace UndertaleModTool
                 OpenInTab(Highlighted, true);
             }
         }
+
         private void MainTree_KeyUp(object sender, KeyEventArgs e)
         {
+            bool newTab = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
             if (e.Key == Key.Return)
             {
-                OpenInTab(Highlighted);
+                OpenInTab(Highlighted, newTab);
             }
         }
 
