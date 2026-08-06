@@ -143,7 +143,7 @@
                     <MenuItem Header="_New project" Command="{x:Static local:MainWindow.NewProjectCommand}"></MenuItem>
                     <MenuItem Header="_Open project" Command="{x:Static local:MainWindow.OpenProjectCommand}" InputGestureText="Ctrl+Shift+O"></MenuItem>
                     <MenuItem Header="_Open last project" Command="{x:Static local:MainWindow.OpenLastProjectCommand}" InputGestureText="Ctrl+Shift+R"></MenuItem>
-                    <MenuItem Header="_Save project" Command="{x:Static local:MainWindow.SaveProjectCommand}">
+                    <MenuItem Header="_Save project" Command="{x:Static local:MainWindow.SaveProjectCommand}" InputGestureText="Ctrl+Shift+S">
                         <MenuItem.Style>
                             <Style TargetType="{x:Type MenuItem}">
                                 <Style.Triggers>
